@@ -14,6 +14,8 @@ GND        8          GND
 #include <Arduino.h>
 #include <SPI.h>
 #include "c64font.h"
+#include "string.h"
+#include "stdio.h"
 
 #define SLAVE_SELECT_PIN 10
 #define DISP_ENABLE_PIN 4
@@ -28,6 +30,9 @@ GND        8          GND
 #define DISPLAY_ROW_BYTES (DISPLAY_WIDTH / 8)
 
 unsigned char data[DISPLAY_HEIGHT][DISPLAY_ROW_BYTES];
+unsigned char display_data_offset = 0; // to allow scrolling without shuffling data about
+unsigned char cursor_y = 0;
+unsigned char cursor_x = 0;
 
 void clear() {
   memset(&data, 0, sizeof(data));
@@ -46,7 +51,7 @@ void refresh_rows(int start_row, int end_row) {
   for (int row = start_row; row <= end_row; row++) {
     SPI.transfer(row + 1); // display is 1-indexed, array is 0-indexed
     for (int col = 0; col < DISPLAY_ROW_BYTES; col++) {
-      SPI.transfer(~data[row][col]);
+      SPI.transfer(~data[(row + display_data_offset) % DISPLAY_HEIGHT][col]);
     }
     SPI.transfer(0); // First 0 signals end of row
   }
@@ -83,7 +88,54 @@ void writeText(int xbyte, int y, char * text) {
   refresh_rows(y, y+8);
 }
 
+void scroll(int rows) {
+  display_data_offset = (display_data_offset + rows) % DISPLAY_HEIGHT;
+}
+
+void print(char * text) {
+  Serial.print("------------\nPrinting ");
+  Serial.println(text);
+  int len = strlen(text);
+  char line[13] = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+  int local_cursor_x = cursor_x;
+  int local_cursor_y = cursor_y;
+  int advance = DISPLAY_ROW_BYTES;
+  int pos = 0;
+  for (pos = 0; pos < len; pos += advance) {
+    advance = DISPLAY_ROW_BYTES - local_cursor_x;
+    Serial.print("Drawing from pos = ");
+    Serial.print(pos);
+    Serial.print(" with advance = ");
+    Serial.println(advance);
+    local_cursor_y = local_cursor_y % (DISPLAY_HEIGHT / 8);
+    strncpy((char*)&line, (char*)&(text[pos]), advance);
+    Serial.print("line = ");
+    Serial.println((char*)&line);
+    Serial.print("Drawing at x = ");
+    Serial.print(local_cursor_x);
+    Serial.print(" y = ");
+    Serial.println(local_cursor_y);
+    writeText(local_cursor_x, local_cursor_y * 8, line);
+    local_cursor_x = 0;
+    local_cursor_y++;
+    Serial.print("New pos will be ");
+    Serial.println(pos + advance);
+  }
+
+  Serial.print("Terminating with pos = ");
+  Serial.println(pos);
+  
+  cursor_y = (cursor_y + ((cursor_x + len)/ DISPLAY_ROW_BYTES)) % (DISPLAY_HEIGHT / 8);
+  cursor_x = (cursor_x + len) % DISPLAY_ROW_BYTES;
+}
+void println(char * text) {
+  print(text);
+  cursor_y = (cursor_y + 1) % DISPLAY_HEIGHT;
+  cursor_x = 0;
+}
+
 void setup() {
+  Serial.begin(9600);
   pinMode(3, OUTPUT);
   analogWrite(3, 127);
   TCCR2B = TCCR2B & 0xFF;
@@ -101,10 +153,16 @@ void setup() {
 }
 
 void loop() {
-  writeText(0, 8,  "   Hello!");
-  writeText(0, 24, " This is a");
-  writeText(0, 32, " Memory LCD");
-  writeText(0, 64, "\x127\x127\x127\x127\x127\x127\x127\x127\x127\x127\x127\x127");
+  int i = 0;
+  char buf[48] = "         ";
+  while (1) {
+    delay(2000);
+    sprintf(buf, "The quick brown fox jumps over the lazy dog %i", i);
+    println(buf);
+    i++;
+    if (i > 999) i = 0;
+  }
+  display_data_offset = 0;
   delay(4000);
 }
 
