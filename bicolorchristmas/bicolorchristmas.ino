@@ -18,16 +18,6 @@ char bell[][8] = {
     0b00111100,
     0b00111100,
     0b01111110,
-    0b00100000,
-  },
-  {
-    0b00011000,
-    0b00111100,
-    0b00111100,
-    0b00111100,
-    0b00111100,
-    0b00111100,
-    0b01111110,
     0b00010000,
   },
   {
@@ -39,16 +29,6 @@ char bell[][8] = {
     0b00111100,
     0b01111110,
     0b00001000,
-  },
-  {
-    0b00011000,
-    0b00111100,
-    0b00111100,
-    0b00111100,
-    0b00111100,
-    0b00111100,
-    0b01111110,
-    0b00000100,
   },
 };
 
@@ -78,7 +58,7 @@ char treegreen[] = {
   0b00011000,
   0b00011000,
   0b00111100,
-  0b00011000,
+  0b00011100,
   0b00111100,
   0b01111110,
   0b00111100,
@@ -107,6 +87,28 @@ char stockinggreen[] = {
   0b00000010,
   0b00010000,
   0b00001000,
+};
+char star[][8] = {
+  {
+    0b00001000,
+    0b00001000,
+    0b00011100,
+    0b01111111,
+    0b00011100,
+    0b00001000,
+    0b00001000,
+    0b00000000,
+  },
+  {
+    0b00001000,
+    0b00101010,
+    0b00011100,
+    0b01111111,
+    0b00011100,
+    0b00101010,
+    0b00001000,
+    0b00000000,
+  },  
 };
 
 void setup() {
@@ -154,17 +156,36 @@ void drawBitmap(Adafruit_BicolorMatrix *matrix, char *red_data, char *green_data
 }
 
 void loop() {
-  drawBitmap(&matrices[0], (char*)&bell[1], (char*)&bell[1]);
-  delay(100);
-  drawBitmap(&matrices[2], (char*)&bell[1], (char*)&bell[1]);
-  delay(100);
-  drawBitmap(&matrices[1], (char*)&bell[1], (char*)&bell[1]);
-  delay(100);
-  drawBitmap(&matrices[0], (char*)&bell[2], (char*)&bell[2]);
-  delay(100);
-  drawBitmap(&matrices[2], (char*)&bell[2], (char*)&bell[2]);
-  delay(100);
-  drawBitmap(&matrices[1], (char*)&bell[2], (char*)&bell[2]);
-  delay(100);
+  if (0) {
+    // bells
+    drawBitmap(&matrices[0], (char*)&bell[0], (char*)&bell[0]);
+    delay(100);
+    drawBitmap(&matrices[2], (char*)&bell[0], (char*)&bell[0]);
+    delay(100);
+    drawBitmap(&matrices[1], (char*)&bell[0], (char*)&bell[0]);
+    delay(100);
+    drawBitmap(&matrices[0], (char*)&bell[1], (char*)&bell[1]);
+    delay(100);
+    drawBitmap(&matrices[2], (char*)&bell[1], (char*)&bell[1]);
+    delay(100);
+    drawBitmap(&matrices[1], (char*)&bell[1], (char*)&bell[1]);
+    delay(100);
+  }
+  if (1) {
+    // stockings + star
+    drawBitmap(&matrices[0], (char*)&stockingred, (char*)&stockinggreen);
+    drawBitmap(&matrices[2], (char*)&stockingred, (char*)&stockinggreen);
+    drawBitmap(&matrices[1], (char*)&star[0], (char*)&star[0]);
+    delay(250);
+    drawBitmap(&matrices[1], (char*)&star[1], (char*)&star[1]);
+    delay(250);
+  }
+  if (0) {
+    // christmas tree
+    matrices[1].setRotation(2);
+    matrices[2].setRotation(2);
+    drawBitmap(&matrices[1], (char*)&treered[0], (char*)&treegreen[0]);
+    drawBitmap(&matrices[2], (char*)&treered[8], (char*)&treegreen[8]);
+  }
 }
 

@@ -15,12 +15,12 @@ void setup() {
   Wire.beginTransmission(104);
   Wire.write(0);
   Wire.write(dec_to_bcd(0)); // seconds
-  Wire.write(dec_to_bcd(56)); // minutes
-  Wire.write(dec_to_bcd(5)); // hours
-  Wire.write(dec_to_bcd(0)); // day (not used)
-  Wire.write(dec_to_bcd(1)); // date
+  Wire.write(dec_to_bcd(26)); // minutes
+  Wire.write(dec_to_bcd(20)); // hours
+  Wire.write(dec_to_bcd(3)); // day (not used)
+  Wire.write(dec_to_bcd(18)); // date
   Wire.write(dec_to_bcd(07)); // month
-  Wire.write(dec_to_bcd(11)); // year
+  Wire.write(dec_to_bcd(13)); // year
   Wire.endTransmission();
 }
 
